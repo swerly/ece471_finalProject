@@ -1,4 +1,6 @@
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -7,7 +9,7 @@ import java.util.Arrays;
  * Created by Seth on 4/21/2017.
  */
 public class CipherTest {
-    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         byte[] text = "This is some sample text that I want to encrypt.".getBytes();
 
         Cipher desCipher = Cipher.getInstance("DES/CBC/NoPadding");
@@ -25,12 +27,19 @@ public class CipherTest {
         SecretKey myDesKey2 = myDesKey;
 
         desCipher.init(Cipher.ENCRYPT_MODE, myDesKey);
-        desCipher2.init(Cipher.ENCRYPT_MODE, myDesKey2);
+        byte[] iv = desCipher.getIV();
+        desCipher2.init(Cipher.ENCRYPT_MODE, myDesKey2, new IvParameterSpec(iv));
+        byte[] iv2 = desCipher2.getIV();
 
         byte[] allTextEncrypted = desCipher.doFinal(text);
         byte[] firstBlockEncrypted = desCipher2.doFinal(firstEight);
 
+        desCipher2.init(Cipher.ENCRYPT_MODE, myDesKey2, new IvParameterSpec(firstBlockEncrypted));
+        byte[] secondBlockEncrypted = desCipher2.doFinal(secondEight);
+
         System.out.println(Arrays.toString(allTextEncrypted));
         System.out.println(Arrays.toString(firstBlockEncrypted));
+        System.out.println(Arrays.toString(secondBlockEncrypted));
+
     }
 }
