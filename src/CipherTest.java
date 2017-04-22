@@ -3,6 +3,7 @@ import javax.crypto.spec.IvParameterSpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -10,36 +11,37 @@ import java.util.Arrays;
  */
 public class CipherTest {
     public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
-        byte[] text = "This is some sample text that I want to encrypt.".getBytes();
+        byte[] text = "This is some sample text that I want to encrypt. Hi.".getBytes();
+        String txt = "This is some sample text that I want to encrypt. Hi.";
 
-        Cipher desCipher = Cipher.getInstance("DES/CBC/NoPadding");
-        Cipher desCipher2 = Cipher.getInstance("DES/CBC/NoPadding");
-
-        byte[] firstEight = new byte[8];
-        byte[] secondEight = new byte[8];
-        for (int i = 0; i<8; i++){
-            firstEight[i] = text[i];
-            secondEight[i] = text[i+8];
+        int ptLength = 0;
+        if (text.length%8 !=0){
+            ptLength = text.length + (8 - ((text.length%8)));
         }
+        byte[] plaintext = new byte[ptLength];
+        System.arraycopy(text, 0, plaintext, 0, text.length);
+        //TEST ECB
+        Cipher desCipher = Cipher.getInstance("DESede/CBC/NoPadding");
 
-        KeyGenerator keygen = KeyGenerator.getInstance("DES");
+        KeyGenerator keygen = KeyGenerator.getInstance("DESede");
         SecretKey myDesKey = keygen.generateKey();
-        SecretKey myDesKey2 = myDesKey;
 
         desCipher.init(Cipher.ENCRYPT_MODE, myDesKey);
-        byte[] iv = desCipher.getIV();
-        desCipher2.init(Cipher.ENCRYPT_MODE, myDesKey2, new IvParameterSpec(iv));
-        byte[] iv2 = desCipher2.getIV();
+        byte[] initVal = desCipher.getIV();
 
-        byte[] allTextEncrypted = desCipher.doFinal(text);
-        byte[] firstBlockEncrypted = desCipher2.doFinal(firstEight);
-
-        desCipher2.init(Cipher.ENCRYPT_MODE, myDesKey2, new IvParameterSpec(firstBlockEncrypted));
-        byte[] secondBlockEncrypted = desCipher2.doFinal(secondEight);
+        byte[] allTextEncrypted = desCipher.doFinal(plaintext);
 
         System.out.println(Arrays.toString(allTextEncrypted));
-        System.out.println(Arrays.toString(firstBlockEncrypted));
-        System.out.println(Arrays.toString(secondBlockEncrypted));
+        //END TEST ECB
 
+
+        Encryptor ecpEnc = new Encryptor(Encryptor.DES3, Encryptor.CBC);
+        ecpEnc.setKey(myDesKey);
+        ecpEnc.setInitVal(initVal);
+        ArrayList<byte[]> encrypted = ecpEnc.runTest(txt);
+        System.out.println();
+        for (byte[] block : encrypted){
+            System.out.print(Arrays.toString(block));
+        }
     }
 }
