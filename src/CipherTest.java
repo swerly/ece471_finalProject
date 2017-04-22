@@ -21,12 +21,14 @@ public class CipherTest {
         byte[] plaintext = new byte[ptLength];
         System.arraycopy(text, 0, plaintext, 0, text.length);
         //TEST ECB
-        Cipher desCipher = Cipher.getInstance("DESede/CBC/NoPadding");
+        Cipher desCipher = Cipher.getInstance("DES/CFB/NoPadding");
 
-        KeyGenerator keygen = KeyGenerator.getInstance("DESede");
+        KeyGenerator keygen = KeyGenerator.getInstance("DES");
         SecretKey myDesKey = keygen.generateKey();
 
         desCipher.init(Cipher.ENCRYPT_MODE, myDesKey);
+        System.out.println("IV working: " + Arrays.toString(desCipher.getIV()));
+        System.out.println("Key working: " + Arrays.toString(myDesKey.getEncoded()));
         byte[] initVal = desCipher.getIV();
 
         byte[] allTextEncrypted = desCipher.doFinal(plaintext);
@@ -35,7 +37,7 @@ public class CipherTest {
         //END TEST ECB
 
 
-        Encryptor ecpEnc = new Encryptor(Encryptor.DES3, Encryptor.CBC);
+        Encryptor ecpEnc = new Encryptor(Encryptor.DES, Encryptor.CFB);
         ecpEnc.setKey(myDesKey);
         ecpEnc.setInitVal(initVal);
         ArrayList<byte[]> encrypted = ecpEnc.runTest(txt);

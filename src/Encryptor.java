@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Seth on 4/21/2017.
@@ -55,10 +56,13 @@ public class Encryptor {
                 runCBC();
                 break;
             case CFB:
+                runCFB();
                 break;
             case OFB:
+                runOFB();
                 break;
             case CTR:
+                runCTR();
                 break;
             default:
                 System.out.println("This shouldn't happen...");
@@ -84,11 +88,6 @@ public class Encryptor {
     private void runCBC(){
         try{
             encrypted = new ArrayList<>();
-            if (initVal != null) {
-                currentCipher.init(Cipher.ENCRYPT_MODE, key);
-            } else {
-
-            }
 
             for (int i = 0; i < blocks.size(); i++){
                 if (i != 0){
@@ -101,6 +100,45 @@ public class Encryptor {
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    private void runCFB(){
+        try {
+            System.out.println("IV norking: " + Arrays.toString(initVal));
+            System.out.println("Key working: " + Arrays.toString(key.getEncoded()));
+            encrypted = new ArrayList<>();
+            byte[] thisIV = initVal == null ? currentCipher.getIV() : initVal;
+            byte[] previousOut = null;
+            for (int i = 0; i < blocks.size(); i++) {
+                byte[] encIV;
+                if (i != 0) {
+                    currentCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(previousOut));
+                    encIV = currentCipher.doFinal(previousOut);
+                } else {
+                    currentCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(thisIV));
+                    encIV = currentCipher.doFinal(thisIV);
+                }
+
+                //xor encIV with current block
+                byte[] xorResult = new byte[blockSize];
+                byte[] curBlock = blocks.get(i);
+                for (int j = 0; j<encIV.length; j++){
+                    xorResult[j] = (byte) (((int) curBlock[j]) ^ ((int) encIV[j]));
+                }
+                previousOut = xorResult;
+                encrypted.add(xorResult);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void runOFB(){
+
+    }
+
+    private void runCTR(){
+
     }
 
     public void setKey(SecretKey key){
