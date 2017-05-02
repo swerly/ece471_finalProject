@@ -5,9 +5,9 @@ import java.util.ArrayList;
  */
 public class Utilities {
     //get an arraylist with each block
-    public static ArrayList<byte[]> getBlocksFromString(String str, int blockLength){
+    public static ArrayList<byte[]> getBlocksFromArray(byte[] input, int blockLength){
         ArrayList<byte[]> toReturn = new ArrayList<>();
-        byte[] allBytes = str.getBytes();
+        byte[] allBytes = input;
         int bytesToPad = blockLength - (allBytes.length%blockLength);
         int totalBlocks = (int)(Math.ceil((float)allBytes.length/blockLength));
 
