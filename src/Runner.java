@@ -3,12 +3,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Runner {
+    public static String currentFileExtension;
+    public static String currentFileName;
+    public static int byteLength;
 
     public void run() {
         //setup
         try {
-            Path inputFilePath = Paths.get(".", "testFiles", "test.txt");
+            String inputFileName = "imgTest.jpg";
+            Path inputFilePath = Paths.get(".", "testFiles", inputFileName);
             byte[] inputByteArray = Files.readAllBytes(inputFilePath);
+            byteLength = inputByteArray.length;
+            String[] split = inputFileName.split(".");
+            currentFileExtension = split[1];
+            currentFileName = split[0];
+
             String curCipher;
 
             for (int i = 0; i < 3; i++) {

@@ -185,6 +185,7 @@ public class Encryptor {
                     currentCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(currentIV));
                 } else {
                     currentCipher.init(Cipher.ENCRYPT_MODE, key);
+                    currentIV = currentCipher.getIV();
                 }
                 encrypted.add(currentCipher.doFinal(blocks.get(i)));
             }
